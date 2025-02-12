@@ -31,6 +31,13 @@ function SidebarComponent({children}) {
       ),
     },
     {
+      label: "Profile",
+      href: "Profile",
+      icon: (
+        <IconUserBolt className="text-neutral-700 dark:text-neutral-200 h-5 w-5 flex-shrink-0" />
+      ),
+    },
+    {
       label: "Teams",
       href: "Teams",
       icon: (
@@ -76,7 +83,7 @@ function SidebarComponent({children}) {
             <SidebarLink
               link={{
                 label: (<p className="text-3xl font-semibold">Tasks<span className="text-cyan-600">Blaze</span></p>),
-                href: "/",
+                href: "/TaskblazeAI",
                 icon: (
                   <p className="text-3xl"><LuBrain /></p>
                 ),
