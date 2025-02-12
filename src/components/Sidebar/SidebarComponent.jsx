@@ -91,7 +91,7 @@ function SidebarComponent({children}) {
           </div>
         </SidebarBody>
       </Sidebar>
-      <div className="h-screen w-full flex items-center justify-center">{children}</div>
+      <div className="h-screen w-full flex items-center justify-center bg-gray-900">{children}</div>
      
     </div>)
   );
