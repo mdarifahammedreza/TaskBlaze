@@ -2,9 +2,12 @@
 import { useState, useEffect, useRef } from "react";
 import { FaUser, FaRobot, FaMicrophone } from "react-icons/fa";
 import { TextGenerateEffect } from "../ui/text-generate-effect";
+import axios from "axios";
 
-export default function ChatUI() {
-  const words = "I am an AI assistant Of Taskblaze. I am here to help you with your queries. But I am still under construction. Please be patient with me.";
+export default function ChatUI({ setThinkTexts }) {
+  console.log("setThinkTexts", setThinkTexts);
+  const words =
+    "I am an AI assistant of Taskblaze. I am here to help you with your queries. But I am still under construction. Please be patient with me.";
   const [messages, setMessages] = useState([
     { sender: "ai", text: "Hello! How can I assist you today?" },
   ]);
@@ -12,19 +15,45 @@ export default function ChatUI() {
   const [typing, setTyping] = useState(false);
   const chatRef = useRef(null);
 
-  const sendMessage = (text) => {
+  const sendMessage = async (text) => {
     if (!text.trim()) return;
+
     setMessages([...messages, { sender: "user", text }]);
     setInput("");
-
     setTyping(true);
-    setTimeout(() => {
+
+    try {
+      const response = await axios.post("http://127.0.0.1:8000/chat", {
+        message: text,
+      });
+
+      // Extract content inside <think>...</think> and store separately
+      const extractedThinkText = response.data.response.match(
+        /<think[^>]*>(.*?)<\/think>/gis
+      )?.map(match => match.replace(/<\/?think[^>]*>/gi, "").trim()) || [];
+      console.log("Extracted <think> content:", extractedThinkText);
+      // setThinkTexts([extractedThinkText]);
+      // Clean response by removing <think> tags and extra spaces
+      const cleanedMessage = response.data.response
+        .replace(/<think[^>]*>.*?<\/think>/gis, "")
+        .replace(/\s+/g, " ")
+        .trim();
+
       setMessages((prev) => [
         ...prev,
-        { sender: "ai", text: <TextGenerateEffect words={words} /> },
+        { sender: "ai", text: <TextGenerateEffect words={cleanedMessage} /> },
       ]);
+
+      console.log("Extracted <think> content:", extractedThinkText);
+    } catch (error) {
+      console.error("Error sending message:", error);
+      setMessages((prev) => [
+        ...prev,
+        { sender: "ai", text: "Sorry, something went wrong." },
+      ]);
+    } finally {
       setTyping(false);
-    }, 2000);
+    }
   };
 
   useEffect(() => {
@@ -40,7 +69,7 @@ export default function ChatUI() {
   };
 
   return (
-    <div className="flex flex-col  h-screen  border-cyan-400 w-full lg:min-w-[50rem] bg-gray-900 text-white p-6">
+    <div className="flex flex-col h-screen border-cyan-400 w-full lg:min-w-[50rem] bg-gray-900 text-white p-6">
       <div
         ref={chatRef}
         className="flex-1 overflow-y-auto space-y-4 p-4 border border-gray-700 rounded-lg"
@@ -48,17 +77,15 @@ export default function ChatUI() {
         {messages.map((msg, index) => (
           <div
             key={index}
-            className={`flex items-center space-x-3 ${
-              msg.sender === "user" ? "justify-end" : "justify-start"
-            }`}
+            className={`flex items-center space-x-3 ${msg.sender === "user" ? "justify-end" : "justify-start"
+              }`}
           >
             {msg.sender === "ai" && <FaRobot className="text-cyan-400" />}
             <div
-              className={`px-4 py-2 rounded-lg max-w-xs animate-fade-in ${
-                msg.sender === "user"
+              className={`px-4 py-2 rounded-lg max-w-xs animate-fade-in ${msg.sender === "user"
                   ? "bg-cyan-500 text-white"
                   : "bg-gray-800 text-gray-300"
-              }`}
+                }`}
             >
               {msg.text}
             </div>
@@ -96,4 +123,3 @@ export default function ChatUI() {
     </div>
   );
 }
-

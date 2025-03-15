@@ -1,12 +1,15 @@
+'use client';
 import ChatUI from '@/components/ChatAI/ChatUI'
 import TaskViewCard from '@/components/Task/CardUi'
 import { GrTask } from "react-icons/gr";
-import React from 'react'
-
+import React, { useState } from 'react'
+import ThinkTextDisplay from '@/components/ChatAI/ThinkUI';
 export default function () {
+    const {thinkTexts, setThinkTexts} = useState([]);
     return (
         <div className='flex'>
-            <ChatUI />
+            <ThinkTextDisplay thinkTexts={thinkTexts} />
+            <ChatUI setThinkTexts={setThinkTexts}/>
             <div className="bg-gray-800 ">
                 <div className='flex justify-center items-center bg-cyan-400 text-slate-200 text-2xl font-semibold p-2 gap-2'><GrTask />
                     <p className=''>Upcoming Task</p>
